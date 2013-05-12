@@ -11,7 +11,7 @@ int Main(const List<String>& arguments)
 		bool running = true;
 
 		auto window = Window::Create("Vr32", virtualBoy.GetOutputWidth(), virtualBoy.GetOutputHeight());
-		window->Close += [&] ()
+		window->Closing += [&] ()
 		{
 			running = false;
 		};
@@ -30,7 +30,11 @@ int Main(const List<String>& arguments)
 					if (!romFileName.EndsWith(".vb")) throw FSL_EXCEPTION("ROM files must have a .vb extension");
 					virtualBoy.LoadRom(File::ReadAllBytes(romFileName));
 					ramFileName = romFileName.Substring(romFileName.Length() - 2) + "ram";
-					// TODO: Check if .ram file exists; load if so
+					try
+					{
+						virtualBoy.LoadRam(File::ReadAllBytes(ramFileName));
+					}
+					catch (...) { }
 				}
 				catch (const Exception& e)
 				{
@@ -62,6 +66,9 @@ int Main(const List<String>& arguments)
 		menu->AddChild(helpMenu);
 		window->SetMenu(menu);
 
+		auto viewport = Viewport::Create();
+		window->AddChild(viewport);
+
 		if (arguments.Count()) loadRomFile(arguments[0]); // TODO: proper args
 
 		while (running)
@@ -91,6 +98,7 @@ int Main(const List<String>& arguments)
 		delete systemReset;
 		delete helpMenu;
 		delete helpAbout;
+		delete viewport;
 	}
 	catch (const Exception& e)
 	{
