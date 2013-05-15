@@ -31,7 +31,7 @@ void VirtualBoy::Update()
 	Threading::Sleep(1);
 }
 
-void VirtualBoy::SetVideoModule(VideoModule *videoModule)
+void VirtualBoy::SetVideoModule(IVideoModule *videoModule)
 {
 	// TODO
 }

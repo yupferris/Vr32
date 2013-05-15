@@ -6,7 +6,7 @@
 class Nvc : public Cpu32
 {
 public:
-	Nvc(Emulator32 *emulator);
+	Nvc(IEmulator32 *emulator);
 
 	virtual void Reset();
 

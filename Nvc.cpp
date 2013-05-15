@@ -1,6 +1,6 @@
 #include "Nvc.h"
 
-Nvc::Nvc(Emulator32 *emulator)
+Nvc::Nvc(IEmulator32 *emulator)
 	: Cpu32(emulator)
 {
 }

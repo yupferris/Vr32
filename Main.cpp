@@ -67,7 +67,7 @@ int Main(const List<String>& arguments)
 		window->SetMenu(menu);
 
 		auto viewport = Viewport::Create();
-		window->AddChild(viewport);
+		window->SetContent(viewport);
 
 		if (arguments.Count()) loadRomFile(arguments[0]); // TODO: proper args
 

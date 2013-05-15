@@ -4,7 +4,7 @@
 #include "Common.h"
 #include "Nvc.h"
 
-class VirtualBoy : public Emulator32
+class VirtualBoy : public IEmulator32
 {
 public:
 	VirtualBoy();
@@ -13,7 +13,7 @@ public:
 	virtual void Reset();
 	virtual void Update();
 
-	virtual void SetVideoModule(VideoModule *videoModule);
+	virtual void SetVideoModule(IVideoModule *videoModule);
 
 	virtual unsigned char ReadByte(unsigned int address);
 	virtual unsigned short ReadWord(unsigned int address);
