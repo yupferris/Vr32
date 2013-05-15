@@ -13,6 +13,8 @@ public:
 	virtual void Reset();
 	virtual void Update();
 
+	virtual void SetVideoModule(VideoModule *videoModule);
+
 	virtual unsigned char ReadByte(unsigned int address);
 	virtual unsigned short ReadWord(unsigned int address);
 	virtual unsigned int ReadDword(unsigned int address);

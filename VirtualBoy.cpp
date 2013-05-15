@@ -31,6 +31,11 @@ void VirtualBoy::Update()
 	Threading::Sleep(1);
 }
 
+void VirtualBoy::SetVideoModule(VideoModule *videoModule)
+{
+	// TODO
+}
+
 unsigned char VirtualBoy::ReadByte(unsigned int address)
 {
 	return 0;
