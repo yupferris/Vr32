@@ -31,7 +31,12 @@ void VirtualBoy::Update()
 	Threading::Sleep(1);
 }
 
-void VirtualBoy::SetVideoModule(IVideoModule *videoModule)
+void VirtualBoy::SetVideoDriver(IVideoDriver *videoDriver)
+{
+	// TODO
+}
+
+void VirtualBoy::SetAudioDriver(IAudioDriver *audioDriver)
 {
 	// TODO
 }

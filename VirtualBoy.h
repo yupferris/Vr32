@@ -13,7 +13,8 @@ public:
 	virtual void Reset();
 	virtual void Update();
 
-	virtual void SetVideoModule(IVideoModule *videoModule);
+	virtual void SetVideoDriver(IVideoDriver *videoDriver);
+	virtual void SetAudioDriver(IAudioDriver *audioDriver);
 
 	virtual unsigned char ReadByte(unsigned int address);
 	virtual unsigned short ReadWord(unsigned int address);

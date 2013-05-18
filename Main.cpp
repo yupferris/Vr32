@@ -6,43 +6,49 @@ int Main(const List<String>& arguments)
 	try
 	{
 		VirtualBoy virtualBoy;
+
+		auto videoDriver = VideoDriverFactory::CreateDefault();
+		virtualBoy.SetVideoDriver(videoDriver);
+		auto audioDriver = AudioDriverFactory::CreateDefault();
+		virtualBoy.SetAudioDriver(audioDriver);
+
 		String romFileName, ramFileName;
 
 		bool running = true;
 
 		auto window = Window::Create("Vr32", virtualBoy.GetOutputWidth(), virtualBoy.GetOutputHeight());
-		window->Closing += [&] ()
-		{
-			running = false;
-		};
+		window->Closing += [&]
+			{
+				running = false;
+			};
 		window->KeyDown += [&] (Key key)
-		{
-			if (key == Key::Escape) running = false;
-		};
+			{
+				if (key == Key::Escape) running = false;
+			};
 
 		auto loadRomFile = [&] (const String& fileName)
-		{
-			romFileName = fileName;
-			if (romFileName.Length())
 			{
-				try
+				romFileName = fileName;
+				if (romFileName.Length())
 				{
-					if (!romFileName.EndsWith(".vb")) throw FSL_EXCEPTION("ROM files must have a .vb extension");
-					virtualBoy.LoadRom(File::ReadAllBytes(romFileName));
-					ramFileName = romFileName.Substring(romFileName.Length() - 2) + "ram";
 					try
 					{
-						virtualBoy.LoadRam(File::ReadAllBytes(ramFileName));
+						if (!romFileName.EndsWith(".vb")) throw FSL_EXCEPTION("ROM files must have a .vb extension");
+						virtualBoy.LoadRom(File::ReadAllBytes(romFileName));
+						ramFileName = romFileName.Substring(romFileName.Length() - 2) + "ram";
+						try
+						{
+							virtualBoy.LoadRam(File::ReadAllBytes(ramFileName));
+						}
+						catch (...) { }
 					}
-					catch (...) { }
+					catch (const Exception& e)
+					{
+						MessageWindow::Error(window, e.GetMsg());
+						romFileName = ramFileName = "";
+					}
 				}
-				catch (const Exception& e)
-				{
-					MessageWindow::Error(window, e.GetMsg());
-					romFileName = ramFileName = "";
-				}
-			}
-		};
+			};
 
 		auto menu = Menu::Create();
 		auto fileMenu = Menu::Create("File");
@@ -51,17 +57,17 @@ int Main(const List<String>& arguments)
 		fileMenu->AddChild(fileOpenRom);
 		fileMenu->AddSeparator();
 		auto fileExit = MenuItem::Create("Exit");
-		fileExit->Click += [&] () { running = false; };
+		fileExit->Click += [&] { running = false; };
 		fileMenu->AddChild(fileExit);
 		menu->AddChild(fileMenu);
 		auto systemMenu = Menu::Create("System");
 		auto systemReset = MenuItem::Create("Reset");
-		systemReset->Click += [&] () { virtualBoy.Reset(); };
+		systemReset->Click += [&] { virtualBoy.Reset(); };
 		systemMenu->AddChild(systemReset);
 		menu->AddChild(systemMenu);
 		auto helpMenu = Menu::Create("Help");
 		auto helpAbout = MenuItem::Create("About...");
-		helpAbout->Click += [&] () { MessageWindow::Info(window, "Vr32 - A Virtual Boy emulator"); };
+		helpAbout->Click += [&] { MessageWindow::Info(window, "Vr32 - A Virtual Boy emulator"); };
 		helpMenu->AddChild(helpAbout);
 		menu->AddChild(helpMenu);
 		window->SetMenu(menu);
