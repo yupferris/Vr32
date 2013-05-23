@@ -36,6 +36,7 @@ void Nvc::Run(int targetCycleCount)
 			case 0x02: branchTaken = getPswZ(); break; // BZ/BE
 
 			case 0x05: branchTaken = true; break; // BR
+			case 0x06: branchTaken = getPswS() != getPswOv(); break; // BLT
 
 			case 0x0a: branchTaken = !getPswZ(); break; // BNZ/BNE
 
@@ -94,8 +95,51 @@ void Nvc::Run(int targetCycleCount)
 						cycles(1);
 					}
 					break;
+				case 0x03: // CMP (Register)
+					{
+						unsigned int r1 = r[reg1];
+						unsigned int r2 = r[reg2];
+						unsigned int res = r2 - r1;
+						setPswCy(r1 > r2);
+						setPswOv(isSigned(r2) != isSigned(res));
+						setPswS(isSigned(res));
+						setPswZ(!res);
+						cycles(1);
+					}
+					break;
 
 				case 0x06: pc = r[reg1] & 0xfffffffe; incrementPc = false; cycles(3); break; // JMP
+
+				case 0x0c: // OR
+					{
+						unsigned int res = r[reg2] | r[reg1];
+						setReg(reg2, res);
+						setPswOv(false);
+						setPswS(isSigned(res));
+						setPswZ(!res);
+						cycles(1);
+					}
+					break;
+				case 0x0d: // AND (Register)
+					{
+						unsigned int res = r[reg2] & r[reg1];
+						setReg(reg2, res);
+						setPswOv(false);
+						setPswS(isSigned(res));
+						setPswZ(!res);
+						cycles(1);
+					}
+					break;
+				case 0x0e: // XOR
+					{
+						unsigned int res = r[reg2] ^ r[reg1];
+						setReg(reg2, res);
+						setPswOv(false);
+						setPswS(isSigned(res));
+						setPswZ(!res);
+						cycles(1);
+					}
+					break;
 
 				default:
 					invalidOpcode();
@@ -135,8 +179,50 @@ void Nvc::Run(int targetCycleCount)
 						cycles(1);
 					}
 					break;
+				case 0x14: // SHL (Immediate)
+					{
+						unsigned int r2 = r[reg2];
+						unsigned int res = r2;
+						bool carry = false;
+						if (imm5)
+						{
+							res <<= (imm5 - 1);
+							carry = isSigned(res);
+							res <<= 1;
+						}
+						setReg(reg2, res);
+						setPswCy(carry);
+						setPswOv(false);
+						setPswS(isSigned(res));
+						setPswZ(!res);
+						cycles(1);
+					}
+					break;
 
 				case 0x16: setPswId(false); cycles(1); break; // CLI
+				case 0x17: // SAR (Immediate)
+					{
+						unsigned int r2 = r[reg2];
+						unsigned int res = r2;
+						bool carry = false;
+						if (imm5)
+						{
+							unsigned int signPropagator = isSigned(res) ? 0x80000000 : 0x00000000;
+							for (unsigned int i = 0; i < imm5; i++)
+							{
+								if (i == imm5 - 1) carry = (res & 0x00000001) != 0;
+								res >>= 1;
+								res |= signPropagator;
+							}
+						}
+						setReg(reg2, res);
+						setPswCy(carry);
+						setPswOv(false);
+						setPswS(isSigned(res));
+						setPswZ(!res);
+						cycles(1);
+					}
+					break;
 
 				case 0x1c: // LDSR
 					switch (imm5)
@@ -187,7 +273,16 @@ void Nvc::Run(int targetCycleCount)
 					break;
 				case 0x2a: pc = (pc + disp26) & 0xfffffffe; incrementPc = false; cycles(3); break; // JR
 				case 0x2b: setReg(31, pc + 4); pc = (pc + disp26) & 0xfffffffe; incrementPc = false; cycles(3); break; // JAL
-
+				case 0x2c: // ORI
+					{
+						unsigned int res = r[reg1] | imm16;
+						setReg(reg2, res);
+						setPswOv(false);
+						setPswS(isSigned(res));
+						setPswZ(!res);
+						cycles(1);
+					}
+					break;
 				case 0x2d: // ANDI
 					{
 						unsigned int res = r[reg1] & imm16;
@@ -204,6 +299,14 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int res = emulator->ReadByte(r[reg1] + disp16);
 						if (res & 0x80) res |= 0xffffff00;
+						setReg(reg2, res);
+						cycles(5);
+					}
+					break;
+				case 0x31: // LD.H
+					{
+						unsigned int res = emulator->ReadWord(r[reg1] + disp16);
+						if (res & 0x8000) res |= 0xffff0000;
 						setReg(reg2, res);
 						cycles(5);
 					}

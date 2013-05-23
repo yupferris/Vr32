@@ -81,7 +81,7 @@ unsigned char VirtualBoy::ReadByte(unsigned int address)
 	case 0x07000000: return rom[address & (romSize - 1)];
 	}
 
-	return 0xff;
+	return 0x00;
 }
 
 unsigned short VirtualBoy::ReadWord(unsigned int address)
@@ -110,27 +110,27 @@ void VirtualBoy::WriteByte(unsigned int address, unsigned char value)
 		// VIP
 		break;
 
-	case 0x1000000:
+	case 0x01000000:
 		// VSU
 		break;
 
-	case 0x2000000:
+	case 0x02000000:
 		// Hardware
 		break;
 
-	case 0x4000000:
+	case 0x04000000:
 		// Cart Expansion
 		break;
 
-	case 0x5000000: wram[address & 0xffff] = value; break;
+	case 0x05000000: wram[address & 0xffff] = value; break;
 
-	case 0x6000000:
+	case 0x06000000:
 		address &= 0xffffff;
 		ensureRamSize(address);
 		ram[address] = value;
 		break;
 
-	case 0x7000000: rom[address & (romSize - 1)] = value; break;
+	case 0x07000000: rom[address & (romSize - 1)] = value; break;
 	}
 }
 
