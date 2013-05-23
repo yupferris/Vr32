@@ -27,8 +27,8 @@ void Nvc::Run(int targetCycleCount)
 		if ((instruction & 0xe000) == 0x8000)
 		{
 			// Format III
-			int cond = (instruction >> 9) & 0x0f;
-			int disp9 = instruction & 0x01ff;
+			unsigned int cond = (instruction >> 9) & 0x0f;
+			unsigned int disp9 = instruction & 0x01ff;
 			if (disp9 & 0x0100) disp9 |= 0xfffffe00;
 			bool branchTaken = false;
 			switch (cond)
@@ -58,8 +58,8 @@ void Nvc::Run(int targetCycleCount)
 		else
 		{
 			unsigned char opcode = (instruction >> 10) & 0x3f;
-			int reg1 = instruction & 0x1f;
-			int reg2 = (instruction >> 5) & 0x1f;
+			unsigned int reg1 = instruction & 0x1f;
+			unsigned int reg2 = (instruction >> 5) & 0x1f;
 			if (opcode < 0x10)
 			{
 				// Format I
@@ -105,8 +105,8 @@ void Nvc::Run(int targetCycleCount)
 			else if (opcode < 0x20)
 			{
 				// Format II
-				int imm5 = reg1;
-				int seImm5 = imm5;
+				unsigned int imm5 = reg1;
+				unsigned int seImm5 = imm5;
 				if (seImm5 & 0x10) seImm5 |= 0xffffffe0;
 				switch (opcode)
 				{
@@ -128,7 +128,7 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2 - seImm5;
-						setPswCy(*(unsigned int *)&seImm5 > r2);
+						setPswCy(seImm5 > r2);
 						setPswOv(isSigned(r2) != isSigned(res));
 						setPswS(isSigned(res));
 						setPswZ(!res);
@@ -162,13 +162,13 @@ void Nvc::Run(int targetCycleCount)
 			else
 			{
 				// Formats IV-VII
-				int imm16 = emulator->ReadWord(pc + 2);
-				int seImm16 = imm16;
+				unsigned int imm16 = emulator->ReadWord(pc + 2);
+				unsigned int seImm16 = imm16;
 				if (seImm16 & 0x8000) seImm16 |= 0xffff0000;
 				instruction = (instruction << 16) | imm16;
-				int disp26 = instruction & 0x03ffffff;
+				unsigned int disp26 = instruction & 0x03ffffff;
 				if (disp26 & 0x02000000) disp26 |= 0xfc000000;
-				int disp16 = seImm16;
+				unsigned int disp16 = seImm16;
 				bool incrementPc = true;
 				switch (opcode)
 				{
