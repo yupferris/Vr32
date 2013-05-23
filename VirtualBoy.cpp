@@ -23,22 +23,32 @@ VirtualBoy::~VirtualBoy()
 void VirtualBoy::Reset()
 {
 	nvc->Reset();
-	for (int i = 0; i < 0x10000; i++) wram[i] = 0;
+	Random random(Time::GetCurrent());
+	for (int i = 0; i < 0x10000; i++) wram[i] = random.GetNextInt(256);
+
+	frameTimer = 0;
 }
 
 void VirtualBoy::Update()
 {
-	Threading::Sleep(1);
+	auto currentTime = Time::GetCurrent();
+	int t = 20 - (currentTime - frameTimer);
+	Threading::Sleep(t > 1 ? t : 1);
+	frameTimer = currentTime;
+
+	nvc->Run(400000);
 }
 
 void VirtualBoy::SetVideoDriver(IVideoDriver *videoDriver)
 {
-	// TODO
 }
 
 void VirtualBoy::SetAudioDriver(IAudioDriver *audioDriver)
 {
-	// TODO
+}
+
+void VirtualBoy::CpuCyclesCallback(int numCycles)
+{
 }
 
 unsigned char VirtualBoy::ReadByte(unsigned int address)
@@ -65,7 +75,7 @@ unsigned char VirtualBoy::ReadByte(unsigned int address)
 
 	case 0x06000000:
 		address &= 0xffffff;
-		while (ramSize < (int)address) ramSize *= 2;
+		ensureRamSize(address);
 		return ram[address];
 
 	case 0x07000000: return rom[address & (romSize - 1)];
@@ -76,6 +86,7 @@ unsigned char VirtualBoy::ReadByte(unsigned int address)
 
 unsigned short VirtualBoy::ReadWord(unsigned int address)
 {
+	address &= 0xfffffffe;
 	auto low = ReadByte(address);
 	auto high = ReadByte(address + 1);
 	return (high << 8) | low;
@@ -83,6 +94,7 @@ unsigned short VirtualBoy::ReadWord(unsigned int address)
 
 unsigned int VirtualBoy::ReadDword(unsigned int address)
 {
+	address &= 0xfffffffc;
 	auto b1 = ReadByte(address);
 	auto b2 = ReadByte(address + 1);
 	auto b3 = ReadByte(address + 2);
@@ -114,7 +126,7 @@ void VirtualBoy::WriteByte(unsigned int address, unsigned char value)
 
 	case 0x6000000:
 		address &= 0xffffff;
-		while (ramSize < (int)address) ramSize *= 2;
+		ensureRamSize(address);
 		ram[address] = value;
 		break;
 
@@ -124,6 +136,7 @@ void VirtualBoy::WriteByte(unsigned int address, unsigned char value)
 
 void VirtualBoy::WriteWord(unsigned int address, unsigned short value)
 {
+	address &= 0xfffffffe;
 	auto low = value & 0xff;
 	auto high = (value >> 8) & 0xff;
 	WriteByte(address, low);
@@ -132,6 +145,7 @@ void VirtualBoy::WriteWord(unsigned int address, unsigned short value)
 
 void VirtualBoy::WriteDword(unsigned int address, unsigned int value)
 {
+	address &= 0xfffffffc;
 	auto b1 = value & 0xff;
 	auto b2 = (value >> 8) & 0xff;
 	auto b3 = (value >> 16) & 0xff;
@@ -140,6 +154,17 @@ void VirtualBoy::WriteDword(unsigned int address, unsigned int value)
 	WriteByte(address + 1, b2);
 	WriteByte(address + 2, b3);
 	WriteByte(address + 3, b4);
+}
+
+void VirtualBoy::ensureRamSize(unsigned int ramAddress)
+{
+	if ((int)ramAddress > ramSize)
+	{
+		auto oldRamSize = ramSize;
+		while (ramSize < (int)ramAddress) ramSize *= 2;
+		Random random(Time::GetCurrent());
+		for (int i = oldRamSize; i < ramSize; i++) ram[i] = random.GetNextInt(256);
+	}
 }
 
 void VirtualBoy::LoadRom(const List<unsigned char>& rom)

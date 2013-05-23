@@ -16,12 +16,16 @@ public:
 	virtual void SetVideoDriver(IVideoDriver *videoDriver);
 	virtual void SetAudioDriver(IAudioDriver *audioDriver);
 
+	virtual void CpuCyclesCallback(int numCycles);
+
 	virtual unsigned char ReadByte(unsigned int address);
 	virtual unsigned short ReadWord(unsigned int address);
 	virtual unsigned int ReadDword(unsigned int address);
 	virtual void WriteByte(unsigned int address, unsigned char value);
 	virtual void WriteWord(unsigned int address, unsigned short value);
 	virtual void WriteDword(unsigned int address, unsigned int value);
+
+	void ensureRamSize(unsigned int ramAddress);
 
 	void LoadRom(const List<unsigned char>& rom);
 	void LoadRam(const List<unsigned char>& ram);
@@ -39,6 +43,8 @@ private:
 	unsigned char *ram;
 	unsigned char *wram;
 	int romSize, ramSize;
+
+	unsigned int frameTimer;
 };
 
 #endif

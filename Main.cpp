@@ -35,7 +35,7 @@ int Main(const List<String>& arguments)
 					{
 						if (!romFileName.EndsWith(".vb")) throw FSL_EXCEPTION("ROM files must have a .vb extension");
 						virtualBoy.LoadRom(File::ReadAllBytes(romFileName));
-						ramFileName = romFileName.Substring(romFileName.Length() - 2) + "ram";
+						ramFileName = romFileName.Substring(0, romFileName.Length() - 2) + "ram";
 						try
 						{
 							virtualBoy.LoadRam(File::ReadAllBytes(ramFileName));
@@ -75,7 +75,7 @@ int Main(const List<String>& arguments)
 		auto viewport = Viewport::Create();
 		window->SetContent(viewport);
 
-		if (arguments.Count()) loadRomFile(arguments[0]); // TODO: proper args
+		if (arguments.Count() == 1) loadRomFile(arguments[0]);
 
 		while (running)
 		{
