@@ -300,7 +300,7 @@ void Nvc::setPswId(bool set)
 	}
 	else
 	{
-		psw &= 0xffff7fff;
+		psw &= 0xffffefff;
 	}
 }
 
