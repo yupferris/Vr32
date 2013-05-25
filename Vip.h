@@ -39,6 +39,21 @@ private:
 
 	IVideoDriver *videoDriver;
 
+	unsigned short interruptPendingReg;
+	unsigned short interruptEnableReg;
+	unsigned short interruptClearReg;
+	unsigned short displayStatusReg;
+	unsigned short displayControlReg;
+	unsigned short ledBrightness1Reg, ledBrightness2Reg, ledBrightmess3Reg, ledBrightnessIdleReg;
+	unsigned short frameRepeatReg;
+	unsigned short columnTableAddressReg;
+	unsigned short drawingStatusReg;
+	unsigned short drawingControlReg;
+	unsigned short objGroup0PointerReg, objGroup1PointerReg, objGroup2PointerReg, objGroup3PointerReg;
+	unsigned short bgPalette0Reg, bgPalette1Reg, bgPalette2Reg, bgPalette3Reg;
+	unsigned short objPalette0Reg, objPalette1Reg, objPalette2Reg, objPalette3Reg;
+	unsigned short clearColorReg;
+
 	unsigned char *currentLeftFrameBuffer, *currentRightFrameBuffer;
 
 	int cyclesSinceLastFlush;

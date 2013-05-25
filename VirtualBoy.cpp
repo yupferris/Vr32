@@ -61,7 +61,6 @@ unsigned char VirtualBoy::ReadByte(unsigned int address)
 	switch (address & 0x07000000)
 	{
 	case 0: return vip.ReadByte(address);
-
 	case 0x01000000:
 		// VSU
 		break;
@@ -94,7 +93,6 @@ unsigned short VirtualBoy::ReadWord(unsigned int address)
 		switch (address & 0x07000000)
 		{
 		case 0: return vip.ReadWord(address);
-
 		case 0x01000000:
 			// VSU
 			break;
@@ -162,7 +160,6 @@ void VirtualBoy::WriteByte(unsigned int address, unsigned char value)
 	switch (address & 0x07000000)
 	{
 	case 0: vip.WriteByte(address, value); break;
-
 	case 0x01000000:
 		// VSU
 		break;
@@ -194,7 +191,6 @@ void VirtualBoy::WriteWord(unsigned int address, unsigned short value)
 		switch (address & 0x07000000)
 		{
 		case 0: vip.WriteWord(address, value); break;
-
 		case 0x01000000:
 			// VSU
 			break;
