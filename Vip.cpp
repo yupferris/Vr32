@@ -85,6 +85,58 @@ void Vip::CpuCyclesCallback(int numCycles)
 unsigned char Vip::ReadByte(unsigned int address)
 {
 	address &= 0x0007ffff;
+	if (address < 0x006000)
+	{
+		// Left Frame Buffer 0
+	}
+	else if (address < 0x008000)
+	{
+		// Chr Ram Pattern Table 0
+	}
+	else if (address < 0x00e000)
+	{
+		// Left Frame Buffer 1
+	}
+	else if (address < 0x010000)
+	{
+		// Chr Ram Pattern Table 1
+	}
+	else if (address < 0x016000)
+	{
+		// Right Frame Buffer 0
+	}
+	else if (address < 0x018000)
+	{
+		// Chr Ram Pattern Table 2
+	}
+	else if (address < 0x01e000)
+	{
+		// Right Frame Buffer 1
+	}
+	else if (address < 0x020000)
+	{
+		// Chr Ram Pattern Table 3
+	}
+	else if (address < 0x03d800)
+	{
+		// Background Segments and Window Parameter Table
+	}
+	else if (address < 0x03dc00)
+	{
+		// Window Attributes
+	}
+	else if (address < 0x03e000)
+	{
+		// Column Table
+	}
+	else if (address < 0x040000)
+	{
+		// OAM
+	}
+	else if (address >= 0x078000)
+	{
+		// Chr Ram Pattern Table Mirrors
+	}
 	return 0;
 }
 
@@ -211,6 +263,58 @@ unsigned short Vip::ReadWord(unsigned int address)
 void Vip::WriteByte(unsigned int address, unsigned char value)
 {
 	address &= 0x0007ffff;
+	if (address < 0x006000)
+	{
+		// Left Frame Buffer 0
+	}
+	else if (address < 0x008000)
+	{
+		// Chr Ram Pattern Table 0
+	}
+	else if (address < 0x00e000)
+	{
+		// Left Frame Buffer 1
+	}
+	else if (address < 0x010000)
+	{
+		// Chr Ram Pattern Table 1
+	}
+	else if (address < 0x016000)
+	{
+		// Right Frame Buffer 0
+	}
+	else if (address < 0x018000)
+	{
+		// Chr Ram Pattern Table 2
+	}
+	else if (address < 0x01e000)
+	{
+		// Right Frame Buffer 1
+	}
+	else if (address < 0x020000)
+	{
+		// Chr Ram Pattern Table 3
+	}
+	else if (address < 0x03d800)
+	{
+		// Background Segments and Window Parameter Table
+	}
+	else if (address < 0x03dc00)
+	{
+		// Window Attributes
+	}
+	else if (address < 0x03e000)
+	{
+		// Column Table
+	}
+	else if (address < 0x040000)
+	{
+		// OAM
+	}
+	else if (address >= 0x078000)
+	{
+		// Chr Ram Pattern Table Mirrors
+	}
 }
 
 void Vip::WriteWord(unsigned int address, unsigned short value)
