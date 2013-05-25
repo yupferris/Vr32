@@ -37,10 +37,12 @@ void VirtualBoy::Update()
 	frameTimer = currentTime;
 
 	nvc->Run(400000);
+	vip.Update();
 }
 
 void VirtualBoy::SetVideoDriver(IVideoDriver *videoDriver)
 {
+	vip.SetVideoDriver(videoDriver);
 }
 
 void VirtualBoy::SetAudioDriver(IAudioDriver *audioDriver)
@@ -49,15 +51,14 @@ void VirtualBoy::SetAudioDriver(IAudioDriver *audioDriver)
 
 void VirtualBoy::CpuCyclesCallback(int numCycles)
 {
+	vip.CpuCyclesCallback(numCycles);
 }
 
 unsigned char VirtualBoy::ReadByte(unsigned int address)
 {
 	switch (address & 0x07000000)
 	{
-	case 0:
-		// VIP
-		break;
+	case 0: return vip.ReadByte(address);
 
 	case 0x01000000:
 		// VSU
@@ -86,29 +87,79 @@ unsigned char VirtualBoy::ReadByte(unsigned int address)
 
 unsigned short VirtualBoy::ReadWord(unsigned int address)
 {
-	address &= 0xfffffffe;
-	auto low = ReadByte(address);
-	auto high = ReadByte(address + 1);
-	return (high << 8) | low;
+	if (!(address & 0x01))
+	{
+		switch (address & 0x07000000)
+		{
+		case 0: return vip.ReadWord(address);
+
+		case 0x01000000:
+			// VSU
+			break;
+
+		case 0x02000000:
+			// Hardware
+			break;
+
+		case 0x04000000:
+			// Cart Expansion
+			break;
+
+		case 0x05000000: return ((unsigned short *)wram)[(address / 2) & 0xffff];
+
+		case 0x06000000:
+			address &= 0xffffff;
+			ensureRamSize(address);
+			return ((unsigned short *)ram)[address / 2];
+
+		case 0x07000000: return ((unsigned short *)rom)[(address & (romSize - 1)) / 2];
+		}
+	}
+
+	return 0x00;
 }
 
 unsigned int VirtualBoy::ReadDword(unsigned int address)
 {
-	address &= 0xfffffffc;
-	auto b1 = ReadByte(address);
-	auto b2 = ReadByte(address + 1);
-	auto b3 = ReadByte(address + 2);
-	auto b4 = ReadByte(address + 3);
-	return (b4 << 24) | (b3 << 16) | (b2 << 8) | b1;
+	if (!(address & 0x03))
+	{
+		switch (address & 0x07000000)
+		{
+		case 0:
+			// VIP
+			break;
+
+		case 0x01000000:
+			// VSU
+			break;
+
+		case 0x02000000:
+			// Hardware
+			break;
+
+		case 0x04000000:
+			// Cart Expansion
+			break;
+
+		case 0x05000000: return ((unsigned int *)wram)[(address / 4) & 0xffff];
+
+		case 0x06000000:
+			address &= 0xffffff;
+			ensureRamSize(address);
+			return ((unsigned int *)ram)[address / 4];
+
+		case 0x07000000: return ((unsigned int *)rom)[(address & (romSize - 1)) / 4];
+		}
+	}
+
+	return 0x00;
 }
 
 void VirtualBoy::WriteByte(unsigned int address, unsigned char value)
 {
 	switch (address & 0x07000000)
 	{
-	case 0:
-		// VIP
-		break;
+	case 0: vip.WriteByte(address, value); break;
 
 	case 0x01000000:
 		// VSU
@@ -136,24 +187,70 @@ void VirtualBoy::WriteByte(unsigned int address, unsigned char value)
 
 void VirtualBoy::WriteWord(unsigned int address, unsigned short value)
 {
-	address &= 0xfffffffe;
-	auto low = value & 0xff;
-	auto high = (value >> 8) & 0xff;
-	WriteByte(address, low);
-	WriteByte(address + 1, high);
+	if (!(address & 0x01))
+	{
+		switch (address & 0x07000000)
+		{
+		case 0: vip.WriteWord(address, value); break;
+
+		case 0x01000000:
+			// VSU
+			break;
+
+		case 0x02000000:
+			// Hardware
+			break;
+
+		case 0x04000000:
+			// Cart Expansion
+			break;
+
+		case 0x05000000: ((unsigned short *)wram)[(address & 0xffff) / 2] = value; break;
+
+		case 0x06000000:
+			address &= 0xffffff;
+			ensureRamSize(address);
+			((unsigned short *)ram)[address / 2] = value;
+			break;
+
+		case 0x07000000: ((unsigned short *)rom)[(address & (romSize - 1)) / 2] = value; break;
+		}
+	}
 }
 
 void VirtualBoy::WriteDword(unsigned int address, unsigned int value)
 {
-	address &= 0xfffffffc;
-	auto b1 = value & 0xff;
-	auto b2 = (value >> 8) & 0xff;
-	auto b3 = (value >> 16) & 0xff;
-	auto b4 = (value >> 24) & 0xff;
-	WriteByte(address, b1);
-	WriteByte(address + 1, b2);
-	WriteByte(address + 2, b3);
-	WriteByte(address + 3, b4);
+	if (!(address & 0x03))
+	{
+		switch (address & 0x07000000)
+		{
+		case 0:
+			// VIP
+			break;
+
+		case 0x01000000:
+			// VSU
+			break;
+
+		case 0x02000000:
+			// Hardware
+			break;
+
+		case 0x04000000:
+			// Cart Expansion
+			break;
+
+		case 0x05000000: ((unsigned int *)wram)[(address & 0xffff) / 4] = value; break;
+
+		case 0x06000000:
+			address &= 0xffffff;
+			ensureRamSize(address);
+			((unsigned int *)ram)[address / 4] = value;
+			break;
+
+		case 0x07000000: ((unsigned int *)rom)[(address & (romSize - 1)) / 4] = value; break;
+		}
+	}
 }
 
 void VirtualBoy::ensureRamSize(unsigned int ramAddress)

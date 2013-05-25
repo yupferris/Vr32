@@ -81,7 +81,6 @@ void Nvc::Run(int targetCycleCount)
 						cycles(1);
 					}
 					break;
-
 				case 0x02: // SUB
 					{
 						unsigned int r1 = r[reg1];

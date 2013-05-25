@@ -83,11 +83,13 @@
   <ItemGroup>
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Nvc.cpp" />
+    <ClCompile Include="Vip.cpp" />
     <ClCompile Include="VirtualBoy.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Common.h" />
     <ClInclude Include="Nvc.h" />
+    <ClInclude Include="Vip.h" />
     <ClInclude Include="VirtualBoy.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

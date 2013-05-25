@@ -3,6 +3,7 @@
 
 #include "Common.h"
 #include "Nvc.h"
+#include "Vip.h"
 
 class VirtualBoy : public IEmulator32
 {
@@ -38,6 +39,7 @@ public:
 
 private:
 	Nvc *nvc;
+	Vip vip;
 
 	unsigned char *rom;
 	unsigned char *ram;
