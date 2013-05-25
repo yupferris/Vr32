@@ -75,6 +75,8 @@ int Main(const List<String>& arguments)
 		auto viewport = Viewport::Create();
 		window->SetContent(viewport);
 
+		videoDriver->SetViewport(viewport);
+
 		if (arguments.Count() == 1) loadRomFile(arguments[0]);
 
 		while (running)

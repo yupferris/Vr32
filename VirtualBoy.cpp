@@ -23,6 +23,7 @@ VirtualBoy::~VirtualBoy()
 void VirtualBoy::Reset()
 {
 	nvc->Reset();
+	vip.Reset();
 	Random random(Time::GetCurrent());
 	for (int i = 0; i < 0x10000; i++) wram[i] = random.GetNextInt(256);
 
@@ -36,8 +37,9 @@ void VirtualBoy::Update()
 	Threading::Sleep(t > 1 ? t : 1);
 	frameTimer = currentTime;
 
+	vip.StartFrame();
 	nvc->Run(400000);
-	vip.Update();
+	vip.EndFrame();
 }
 
 void VirtualBoy::SetVideoDriver(IVideoDriver *videoDriver)
@@ -303,12 +305,12 @@ void VirtualBoy::LoadRam(const List<unsigned char>& ram)
 
 int VirtualBoy::GetOutputWidth() const
 {
-	return 384;
+	return vip.GetOutputWidth();
 }
 
 int VirtualBoy::GetOutputHeight() const
 {
-	return 224;
+	return vip.GetOutputHeight();
 }
 
 unsigned char *VirtualBoy::GetRam() const
