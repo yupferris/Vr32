@@ -88,6 +88,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		return leftFrameBuffer0[address];
 	}
 	else if (address < 0x008000)
 	{
@@ -96,6 +97,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		return leftFrameBuffer1[address - 0x008000];
 	}
 	else if (address < 0x010000)
 	{
@@ -104,6 +106,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		return rightFrameBuffer0[address - 0x010000];
 	}
 	else if (address < 0x018000)
 	{
@@ -112,6 +115,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		return rightFrameBuffer1[address - 0x018000];
 	}
 	else if (address < 0x020000)
 	{
@@ -136,6 +140,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	else if (address >= 0x078000)
 	{
 		// Chr Ram Pattern Table Mirrors
+		return chrRam[address & 0x7fff];
 	}
 	return 0;
 }
@@ -146,6 +151,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		return ((unsigned short *)leftFrameBuffer0)[address / 2];
 	}
 	else if (address < 0x008000)
 	{
@@ -154,6 +160,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		return ((unsigned short *)leftFrameBuffer1)[(address - 0x008000) / 2];
 	}
 	else if (address < 0x010000)
 	{
@@ -162,6 +169,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		return ((unsigned short *)rightFrameBuffer0)[(address - 0x010000) / 2];
 	}
 	else if (address < 0x018000)
 	{
@@ -170,6 +178,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		return ((unsigned short *)rightFrameBuffer1)[(address - 0x018000) / 2];
 	}
 	else if (address < 0x020000)
 	{
@@ -256,6 +265,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	else if (address >= 0x078000)
 	{
 		// Chr Ram Pattern Table Mirrors
+		return ((unsigned short *)chrRam)[(address & 0x7fff) / 2];
 	}
 	return 0;
 }
@@ -266,6 +276,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		leftFrameBuffer0[address] = value;
 	}
 	else if (address < 0x008000)
 	{
@@ -274,6 +285,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		leftFrameBuffer1[address - 0x008000] = value;
 	}
 	else if (address < 0x010000)
 	{
@@ -282,6 +294,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		rightFrameBuffer0[address - 0x010000] = value;
 	}
 	else if (address < 0x018000)
 	{
@@ -290,6 +303,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		rightFrameBuffer1[address - 0x018000] = value;
 	}
 	else if (address < 0x020000)
 	{
@@ -314,6 +328,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	else if (address >= 0x078000)
 	{
 		// Chr Ram Pattern Table Mirrors
+		chrRam[address & 0x7fff] = value;
 	}
 }
 
@@ -323,6 +338,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		((unsigned short *)leftFrameBuffer0)[address / 2] = value;
 	}
 	else if (address < 0x008000)
 	{
@@ -331,6 +347,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		((unsigned short *)leftFrameBuffer1)[(address - 0x008000) / 2] = value;
 	}
 	else if (address < 0x010000)
 	{
@@ -339,6 +356,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		((unsigned short *)rightFrameBuffer0)[(address - 0x010000) / 2] = value;
 	}
 	else if (address < 0x018000)
 	{
@@ -347,6 +365,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		((unsigned short *)rightFrameBuffer1)[(address - 0x018000) / 2] = value;
 	}
 	else if (address < 0x020000)
 	{
@@ -433,6 +452,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	else if (address >= 0x078000)
 	{
 		// Chr Ram Pattern Table Mirrors
+		((unsigned short *)chrRam)[(address & 0x7fff) / 2] = value;
 	}
 }
 
