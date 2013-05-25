@@ -41,6 +41,33 @@ void Vip::Reset()
 	}
 	for (int i = 0; i < 0x8000; i++) chrRam[i] = random.GetNextInt(256);
 
+	interruptPendingReg = random.GetNextInt(0xffff);
+	interruptEnableReg = random.GetNextInt(0xffff);
+	interruptClearReg = random.GetNextInt(0xffff);
+	displayStatusReg = random.GetNextInt(0xffff);
+	displayControlReg = random.GetNextInt(0xffff);
+	ledBrightness1Reg = random.GetNextInt(0xffff);
+	ledBrightness2Reg = random.GetNextInt(0xffff);
+	ledBrightmess3Reg = random.GetNextInt(0xffff);
+	ledBrightnessIdleReg = random.GetNextInt(0xffff);
+	frameRepeatReg = random.GetNextInt(0xffff);
+	columnTableAddressReg = random.GetNextInt(0xffff);
+	drawingStatusReg = random.GetNextInt(0xffff);
+	drawingControlReg = random.GetNextInt(0xffff);
+	objGroup0PointerReg = random.GetNextInt(0xffff);
+	objGroup1PointerReg = random.GetNextInt(0xffff);
+	objGroup2PointerReg = random.GetNextInt(0xffff);
+	objGroup3PointerReg = random.GetNextInt(0xffff);
+	bgPalette0Reg = random.GetNextInt(0xffff);
+	bgPalette1Reg = random.GetNextInt(0xffff);
+	bgPalette2Reg = random.GetNextInt(0xffff);
+	bgPalette3Reg = random.GetNextInt(0xffff);
+	objPalette0Reg = random.GetNextInt(0xffff);
+	objPalette1Reg = random.GetNextInt(0xffff);
+	objPalette2Reg = random.GetNextInt(0xffff);
+	objPalette3Reg = random.GetNextInt(0xffff);
+	clearColorReg = random.GetNextInt(0xffff);
+
 	currentLeftFrameBuffer = leftFrameBuffer0;
 	currentRightFrameBuffer = rightFrameBuffer0;
 
@@ -219,7 +246,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 		case 0x0005f830: flush(); return columnTableAddressReg; // Column Table Address
 		case 0x0005f840: flush(); return drawingStatusReg; // Drawing Status
 		case 0x0005f842: return drawingControlReg; // Drawing Control
-		case 0x0005f844: return 2; break; // Version
+		case 0x0005f844: return 2; // Version
 		case 0x0005f848: return objGroup0PointerReg; // OBJ Group 0 Pointer
 		case 0x0005f84a: return objGroup1PointerReg; // OBJ Group 1 Pointer
 		case 0x0005f84c: return objGroup2PointerReg; // OBJ Group 2 Pointer
@@ -366,58 +393,32 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 		if (address < 0x05e000) address = (address & 0x001fff) | 0x05e000; // Mirroring
 		switch (address)
 		{
-		case 0x0005f800: // Interrupt Pending
-			break;
-		case 0x0005f802: // Interrupt Enable
-			break;
-		case 0x0005f804: // Interrupt Clear
-			break;
-		case 0x0005f820: // Display Status
-			break;
-		case 0x0005f822: // Display Control
-			break;
-		case 0x0005f824: // LED Brightness 1
-			break;
-		case 0x0005f826: // LED Brightness 2
-			break;
-		case 0x0005f828: // LED Brightness 3
-			break;
-		case 0x0005f82a: // LED Brightness Idle
-			break;
-		case 0x0005f82e: // Frame Repeat
-			break;
-		case 0x0005f830: // Column Table Address
-			break;
-		case 0x0005f840: // Drawing Status
-			break;
-		case 0x0005f842: // Drawing Control
-			break;
-		case 0x0005f848: // OBJ Group 0 Pointer
-			break;
-		case 0x0005f84a: // OBJ Group 1 Pointer
-			break;
-		case 0x0005f84c: // OBJ Group 2 Pointer
-			break;
-		case 0x0005f84e: // OBJ Group 3 Pointer
-			break;
-		case 0x0005f860: // BG Palette 0
-			break;
-		case 0x0005f862: // BG Palette 1
-			break;
-		case 0x0005f864: // BG Palette 2
-			break;
-		case 0x0005f866: // BG Palette 3
-			break;
-		case 0x0005f868: // OBJ Palette 0
-			break;
-		case 0x0005f86a: // OBJ Palette 1
-			break;
-		case 0x0005f86c: // OBJ Palette 2
-			break;
-		case 0x0005f86e: // OBJ Palette 3
-			break;
-		case 0x0005f870: // Clear Color
-			break;
+		case 0x0005f800: break; // Interrupt Pending
+		case 0x0005f802: break; // Interrupt Enable
+		case 0x0005f804: break; // Interrupt Clear
+		case 0x0005f820: break; // Display Status
+		case 0x0005f822: break; // Display Control
+		case 0x0005f824: break; // LED Brightness 1
+		case 0x0005f826: break; // LED Brightness 2
+		case 0x0005f828: break; // LED Brightness 3
+		case 0x0005f82a: break; // LED Brightness Idle
+		case 0x0005f82e: break; // Frame Repeat
+		case 0x0005f830: break; // Column Table Address
+		case 0x0005f840: break; // Drawing Status
+		case 0x0005f842: break; // Drawing Control
+		case 0x0005f848: break; // OBJ Group 0 Pointer
+		case 0x0005f84a: break; // OBJ Group 1 Pointer
+		case 0x0005f84c: break; // OBJ Group 2 Pointer
+		case 0x0005f84e: break; // OBJ Group 3 Pointer
+		case 0x0005f860: flush(); bgPalette0Reg = value & 0x00ff; break; // BG Palette 0
+		case 0x0005f862: flush(); bgPalette1Reg = value & 0x00ff; break; // BG Palette 1
+		case 0x0005f864: flush(); bgPalette2Reg = value & 0x00ff; break; // BG Palette 2
+		case 0x0005f866: flush(); bgPalette3Reg = value & 0x00ff; break; // BG Palette 3
+		case 0x0005f868: flush(); objPalette0Reg = value & 0x00ff; break; // OBJ Palette 0
+		case 0x0005f86a: flush(); objPalette1Reg = value & 0x00ff; break; // OBJ Palette 1
+		case 0x0005f86c: flush(); objPalette2Reg = value & 0x00ff; break; // OBJ Palette 2
+		case 0x0005f86e: flush(); objPalette3Reg = value & 0x00ff; break; // OBJ Palette 3
+		case 0x0005f870: flush(); clearColorReg = value & 0x0003; // Clear Color
 		}
 	}
 	else if (address >= 0x078000)

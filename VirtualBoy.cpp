@@ -180,7 +180,7 @@ void VirtualBoy::WriteByte(unsigned int address, unsigned char value)
 		ram[address] = value;
 		break;
 
-	case 0x07000000: rom[address & (romSize - 1)] = value; break;
+	case 0x07000000: rom[address & (romSize - 1)] = value;
 	}
 }
 
@@ -211,7 +211,7 @@ void VirtualBoy::WriteWord(unsigned int address, unsigned short value)
 			((unsigned short *)ram)[address / 2] = value;
 			break;
 
-		case 0x07000000: ((unsigned short *)rom)[(address & (romSize - 1)) / 2] = value; break;
+		case 0x07000000: ((unsigned short *)rom)[(address & (romSize - 1)) / 2] = value;
 		}
 	}
 }
@@ -246,7 +246,7 @@ void VirtualBoy::WriteDword(unsigned int address, unsigned int value)
 			((unsigned int *)ram)[address / 4] = value;
 			break;
 
-		case 0x07000000: ((unsigned int *)rom)[(address & (romSize - 1)) / 4] = value; break;
+		case 0x07000000: ((unsigned int *)rom)[(address & (romSize - 1)) / 4] = value;
 		}
 	}
 }
