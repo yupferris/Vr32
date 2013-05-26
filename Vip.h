@@ -28,8 +28,12 @@ public:
 
 private:
 	static const int frameWidth, frameHeight;
+	static const int frameBufferSize;
 
 	void flush();
+
+	unsigned short paletteToRegister(unsigned int *palette);
+	void registerToPalette(unsigned short reg, unsigned int *palette);
 
 	unsigned char *leftFrameBuffer0, *leftFrameBuffer1;
 	unsigned char *rightFrameBuffer0, *rightFrameBuffer1;
@@ -50,9 +54,9 @@ private:
 	unsigned short drawingStatusReg;
 	unsigned short drawingControlReg;
 	unsigned short objGroup0PointerReg, objGroup1PointerReg, objGroup2PointerReg, objGroup3PointerReg;
-	unsigned short bgPalette0Reg, bgPalette1Reg, bgPalette2Reg, bgPalette3Reg;
-	unsigned short objPalette0Reg, objPalette1Reg, objPalette2Reg, objPalette3Reg;
-	unsigned short clearColorReg;
+
+	unsigned int bgPalettes[4][4], objPalettes[4][4];
+	unsigned int clearColorReg;
 
 	unsigned char *currentLeftFrameBuffer, *currentRightFrameBuffer;
 
