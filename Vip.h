@@ -27,10 +27,23 @@ public:
 	int GetOutputHeight() const;
 
 private:
+	enum class DisplayProcedureStatus
+	{
+		None,
+		Beginning,
+		Ready,
+		LeftFb0BeingDisplayed,
+		LeftFb1BeingDisplayed,
+		RightFb0BeingDisplayed,
+		RightFb1BeingDisplayed,
+	};
+
 	static const int frameWidth, frameHeight;
 	static const int frameBufferSize;
 
 	void flush();
+
+	void startVipRefresh();
 
 	unsigned char readPixelByte(const unsigned char *frameBuffer, unsigned int address);
 	unsigned short readPixelWord(const unsigned char *frameBuffer, unsigned int address);
@@ -47,6 +60,12 @@ private:
 	unsigned int *outputFramebuffer;
 
 	IVideoDriver *videoDriver;
+
+	bool isColumnTableAddressLocked;
+	bool areDisplaySyncSignalsEnabled;
+	bool isVipMemoryRefreshing;
+	bool isDisplayEnabled;
+	DisplayProcedureStatus displayProcedureStatus;
 
 	unsigned short interruptClearReg;
 	unsigned short displayControlReg;

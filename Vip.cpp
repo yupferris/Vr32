@@ -42,6 +42,12 @@ void Vip::Reset()
 	}
 	for (int i = 0; i < 0x8000; i++) chrRam[i] = random.GetNextInt(256);
 
+	isColumnTableAddressLocked = false;
+	areDisplaySyncSignalsEnabled = false;
+	isVipMemoryRefreshing = false;
+	isDisplayEnabled = false;
+	displayProcedureStatus = DisplayProcedureStatus::None;
+
 	interruptClearReg = random.GetNextInt(0x10000);
 	displayControlReg = random.GetNextInt(0x10000);
 	ledBrightness1Reg = random.GetNextInt(0x10000);
@@ -230,7 +236,19 @@ unsigned short Vip::ReadWord(unsigned int address)
 		{
 		case 0x0005f800: flush(); break; // Interrupt Pending
 		case 0x0005f802: break; // Interrupt Enable
-		case 0x0005f820: flush(); break; // Display Status
+		case 0x0005f820: // Display Status
+			flush();
+			return
+				((isColumnTableAddressLocked ? 1 : 0) << 10) |
+				((areDisplaySyncSignalsEnabled ? 1 : 0) << 9) |
+				((isVipMemoryRefreshing ? 1 : 0) << 8) |
+				((displayProcedureStatus == DisplayProcedureStatus::Beginning ? 1 : 0) << 7) |
+				((displayProcedureStatus == DisplayProcedureStatus::Ready ? 1 : 0) << 6) |
+				((displayProcedureStatus == DisplayProcedureStatus::RightFb1BeingDisplayed ? 1 : 0) << 5) |
+				((displayProcedureStatus == DisplayProcedureStatus::LeftFb1BeingDisplayed ? 1 : 0) << 4) |
+				((displayProcedureStatus == DisplayProcedureStatus::RightFb0BeingDisplayed ? 1 : 0) << 3) |
+				((displayProcedureStatus == DisplayProcedureStatus::LeftFb0BeingDisplayed ? 1 : 0) << 2) |
+				((isDisplayEnabled ? 1 : 0) << 1);
 		case 0x0005f830: flush(); break; // Column Table Address
 		case 0x0005f840: flush(); break; // Drawing Status
 		case 0x0005f844: return 2; // Version
@@ -382,7 +400,13 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 		{
 		case 0x0005f802: break; // Interrupt Enable
 		case 0x0005f804: break; // Interrupt Clear
-		case 0x0005f822: break; // Display Control
+		case 0x0005f822: // Display Control
+			flush();
+			isColumnTableAddressLocked = ((value >> 10) & 1) == 1;
+			areDisplaySyncSignalsEnabled = ((value >> 9) & 1) == 1;
+			if ((value >> 8) & 1) startVipRefresh();
+			isDisplayEnabled = ((value >> 1) & 1) == 1;
+			break;
 		case 0x0005f824: break; // LED Brightness 1
 		case 0x0005f826: break; // LED Brightness 2
 		case 0x0005f828: break; // LED Brightness 3
@@ -425,6 +449,12 @@ void Vip::flush()
 
 
 	cyclesSinceLastFlush = 0;
+}
+
+void Vip::startVipRefresh()
+{
+	// TODO: I have no fucking clue what else this entails.
+	isVipMemoryRefreshing = true;
 }
 
 unsigned char Vip::readPixelByte(const unsigned char *frameBuffer, unsigned int address)
