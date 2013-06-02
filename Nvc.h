@@ -15,14 +15,7 @@ public:
 private:
 	void setReg(int index, unsigned int value);
 
-	void setPswZ(bool set);
-	bool getPswZ() const;
-	void setPswS(bool set);
-	bool getPswS() const;
-	void setPswOv(bool set);
-	bool getPswOv() const;
-	void setPswCy(bool set);
-	void setPswId(bool set);
+	void setPsw(unsigned int value);
 
 	static bool isSigned(unsigned int value);
 
@@ -32,7 +25,9 @@ private:
 
 	unsigned int r[32];
 	unsigned int pc;
-	unsigned int psw, eipc, eipsw, fepc, fepsw, ecr, adtre, chcw, tkcw, pir;
+	bool pswZ, pswS, pswOv, pswCy, pswFpr, pswFud, pswFov, pswFzd, pswFiv, pswFro, pswId, pswAe, pswEp, pswNp;
+	unsigned int pswInt;
+	unsigned int eipc, eipsw, fepc, fepsw, ecr, adtre, chcw, tkcw, pir;
 
 	int cycleCount;
 };

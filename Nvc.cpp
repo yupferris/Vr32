@@ -11,7 +11,7 @@ void Nvc::Reset()
 	r[0] = 0;
 	for (int i = 1; i < 32; i++) r[i] = random.GetNextInt();
 	pc = 0xfffffff0;
-	psw = 0x00008000;
+	setPsw(0x00008000);
 	eipc = random.GetNextInt();
 	eipsw = random.GetNextInt();
 	fepc = random.GetNextInt();
@@ -33,15 +33,16 @@ void Nvc::Run(int targetCycleCount)
 			bool branchTaken = false;
 			switch (cond)
 			{
-			case 0x02: branchTaken = getPswZ(); break; // BZ/BE
+			case 0x02: branchTaken = pswZ; break; // BZ/BE
 
 			case 0x05: branchTaken = true; break; // BR
-			case 0x06: branchTaken = getPswS() != getPswOv(); break; // BLT
+			case 0x06: branchTaken = pswS != pswOv; break; // BLT
+			case 0x07: branchTaken = pswS != pswOv || pswZ; break; // BLE
 
-			case 0x0a: branchTaken = !getPswZ(); break; // BNZ/BNE
+			case 0x0a: branchTaken = !pswZ; break; // BNZ/BNE
 
-			case 0x0e: branchTaken = getPswS() == getPswOv(); break; // BGE
-
+			case 0x0e: branchTaken = pswS == pswOv; break; // BGE
+			case 0x0f: branchTaken = !(pswS != pswOv || pswZ); break; // BGT
 			default:
 				invalidOpcode();
 			}
@@ -74,10 +75,10 @@ void Nvc::Run(int targetCycleCount)
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2 + r1;
 						setReg(reg2, res);
-						setPswCy(res < r2);
-						setPswOv(isSigned(r2) != isSigned(res));
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswCy = res < r2;
+						pswOv = isSigned(r2) != isSigned(res);
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -87,10 +88,10 @@ void Nvc::Run(int targetCycleCount)
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2 - r1;
 						setReg(reg2, res);
-						setPswCy(r1 > r2);
-						setPswOv(isSigned(r2) != isSigned(res));
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswCy = r1 > r2;
+						pswOv = isSigned(r2) != isSigned(res);
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -99,10 +100,10 @@ void Nvc::Run(int targetCycleCount)
 						unsigned int r1 = r[reg1];
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2 - r1;
-						setPswCy(r1 > r2);
-						setPswOv(isSigned(r2) != isSigned(res));
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswCy = r1 > r2;
+						pswOv = isSigned(r2) != isSigned(res);
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -113,9 +114,9 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int res = r[reg2] | r[reg1];
 						setReg(reg2, res);
-						setPswOv(false);
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswOv = false;
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -123,9 +124,9 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int res = r[reg2] & r[reg1];
 						setReg(reg2, res);
-						setPswOv(false);
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswOv = false;
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -133,9 +134,9 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int res = r[reg2] ^ r[reg1];
 						setReg(reg2, res);
-						setPswOv(false);
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswOv = false;
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -159,10 +160,10 @@ void Nvc::Run(int targetCycleCount)
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2 + seImm5;
 						setReg(reg2, res);
-						setPswCy(res < r2);
-						setPswOv(isSigned(r2) != isSigned(res));
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswCy = res < r2;
+						pswOv = isSigned(r2) != isSigned(res);
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -171,10 +172,10 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2 - seImm5;
-						setPswCy(seImm5 > r2);
-						setPswOv(isSigned(r2) != isSigned(res));
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswCy = seImm5 > r2;
+						pswOv = isSigned(r2) != isSigned(res);
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -182,46 +183,48 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2;
-						bool carry = false;
+						pswCy = false;
 						if (imm5)
 						{
 							res <<= (imm5 - 1);
-							carry = isSigned(res);
+							pswCy = isSigned(res);
 							res <<= 1;
 						}
 						setReg(reg2, res);
-						setPswCy(carry);
-						setPswOv(false);
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswOv = false;
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
 
-				case 0x16: setPswId(false); cycles(1); break; // CLI
+				case 0x16: pswId = false; cycles(1); break; // CLI
 				case 0x17: // SAR (Immediate)
 					{
 						unsigned int r2 = r[reg2];
 						unsigned int res = r2;
-						bool carry = false;
+						pswCy = false;
 						if (imm5)
 						{
 							unsigned int signPropagator = isSigned(res) ? 0x80000000 : 0x00000000;
 							for (unsigned int i = 0; i < imm5; i++)
 							{
-								if (i == imm5 - 1) carry = (res & 0x00000001) != 0;
+								if (i == imm5 - 1) pswCy = (res & 0x00000001) != 0;
 								res >>= 1;
 								res |= signPropagator;
 							}
 						}
 						setReg(reg2, res);
-						setPswCy(carry);
-						setPswOv(false);
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswOv = false;
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
+
+				/*case 0x19: // RETI
+					
+					break;*/
 
 				case 0x1c: // LDSR
 					switch (imm5)
@@ -230,14 +233,14 @@ void Nvc::Run(int targetCycleCount)
 					case 1: eipsw = r[reg2]; break;
 					case 2: fepc = r[reg2]; break;
 					case 3: fepsw = r[reg2]; break;
-					case 5: psw = r[reg2]; break;
+					case 5: setPsw(r[reg2]); break;
 					case 24: chcw = r[reg2]; break;
 					case 25: adtre = r[reg2]; break;
 					}
 					cycles(1);
 					break;
 
-				case 0x1e: setPswId(true); cycles(1); break; // SEI
+				case 0x1e: pswId = true; cycles(1); break; // SEI
 
 				default:
 					invalidOpcode();
@@ -263,10 +266,10 @@ void Nvc::Run(int targetCycleCount)
 						unsigned int r1 = r[reg1];
 						unsigned int res = r1 + seImm16;
 						setReg(reg2, res);
-						setPswCy(res < r1);
-						setPswOv(isSigned(r1) != isSigned(res));
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswCy = res < r1;
+						pswOv = isSigned(r1) != isSigned(res);
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -276,9 +279,9 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int res = r[reg1] | imm16;
 						setReg(reg2, res);
-						setPswOv(false);
-						setPswS(isSigned(res));
-						setPswZ(!res);
+						pswOv = false;
+						pswS = isSigned(res);
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -286,9 +289,9 @@ void Nvc::Run(int targetCycleCount)
 					{
 						unsigned int res = r[reg1] & imm16;
 						setReg(reg2, res);
-						setPswOv(false);
-						setPswS(false);
-						setPswZ(!res);
+						pswOv = false;
+						pswS = false;
+						pswZ = !res;
 						cycles(1);
 					}
 					break;
@@ -331,79 +334,13 @@ void Nvc::setReg(int index, unsigned int value)
 	if (index) r[index] = value;
 }
 
-void Nvc::setPswZ(bool set)
+void Nvc::setPsw(unsigned int value)
 {
-	if (set)
-	{
-		psw |= 0x00000001;
-	}
-	else
-	{
-		psw &= 0xfffffffe;
-	}
-}
-
-bool Nvc::getPswZ() const
-{
-	return (psw & 0x00000001) != 0;
-}
-
-void Nvc::setPswS(bool set)
-{
-	if (set)
-	{
-		psw |= 0x00000002;
-	}
-	else
-	{
-		psw &= 0xfffffffd;
-	}
-}
-
-bool Nvc::getPswS() const
-{
-	return (psw & 0x00000002) != 0;
-}
-
-void Nvc::setPswOv(bool set)
-{
-	if (set)
-	{
-		psw |= 0x00000004;
-	}
-	else
-	{
-		psw &= 0xfffffffb;
-	}
-}
-
-bool Nvc::getPswOv() const
-{
-	return (psw & 0x00000004) != 0;
-}
-
-void Nvc::setPswCy(bool set)
-{
-	if (set)
-	{
-		psw |= 0x00000008;
-	}
-	else
-	{
-		psw &= 0xfffffff7;
-	}
-}
-
-void Nvc::setPswId(bool set)
-{
-	if (set)
-	{
-		psw |= 0x00001000;
-	}
-	else
-	{
-		psw &= 0xffffefff;
-	}
+	pswZ = (value & 0x00000001) != 0;
+	pswS = (value & 0x00000002) != 0;
+	pswOv = (value & 0x00000004) != 0;
+	pswCy = (value & 0x00000008) != 0;
+	pswId = (value & 0x00001000) != 0;
 }
 
 bool Nvc::isSigned(unsigned int value)
