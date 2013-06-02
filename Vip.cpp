@@ -45,7 +45,7 @@ void Vip::Reset()
 	isColumnTableAddressLocked = false;
 	areDisplaySyncSignalsEnabled = false;
 	isVipMemoryRefreshing = false;
-	isDisplayEnabled = false;
+	isDisplayEnabled = isDisplayReady = false;
 	displayProcedureStatus = DisplayProcedureStatus::None;
 
 	interruptClearReg = random.GetNextInt(0x10000);
@@ -75,6 +75,7 @@ void Vip::Reset()
 
 void Vip::StartFrame()
 {
+	displayProcedureStatus = DisplayProcedureStatus::StartOfFrameProcessing;
 }
 
 void Vip::EndFrame()
@@ -242,8 +243,8 @@ unsigned short Vip::ReadWord(unsigned int address)
 				((isColumnTableAddressLocked ? 1 : 0) << 10) |
 				((areDisplaySyncSignalsEnabled ? 1 : 0) << 9) |
 				((isVipMemoryRefreshing ? 1 : 0) << 8) |
-				((displayProcedureStatus == DisplayProcedureStatus::Beginning ? 1 : 0) << 7) |
-				((displayProcedureStatus == DisplayProcedureStatus::Ready ? 1 : 0) << 6) |
+				((displayProcedureStatus == DisplayProcedureStatus::StartOfFrameProcessing ? 1 : 0) << 7) |
+				((isDisplayReady ? 1 : 0) << 6) |
 				((displayProcedureStatus == DisplayProcedureStatus::RightFb1BeingDisplayed ? 1 : 0) << 5) |
 				((displayProcedureStatus == DisplayProcedureStatus::LeftFb1BeingDisplayed ? 1 : 0) << 4) |
 				((displayProcedureStatus == DisplayProcedureStatus::RightFb0BeingDisplayed ? 1 : 0) << 3) |
@@ -405,7 +406,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 			isColumnTableAddressLocked = ((value >> 10) & 1) == 1;
 			areDisplaySyncSignalsEnabled = ((value >> 9) & 1) == 1;
 			if ((value >> 8) & 1) startVipRefresh();
-			isDisplayEnabled = ((value >> 1) & 1) == 1;
+			isDisplayEnabled = isDisplayReady = ((value >> 1) & 1) == 1;
 			break;
 		case 0x0005f824: break; // LED Brightness 1
 		case 0x0005f826: break; // LED Brightness 2

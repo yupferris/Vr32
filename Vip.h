@@ -30,8 +30,7 @@ private:
 	enum class DisplayProcedureStatus
 	{
 		None,
-		Beginning,
-		Ready,
+		StartOfFrameProcessing,
 		LeftFb0BeingDisplayed,
 		LeftFb1BeingDisplayed,
 		RightFb0BeingDisplayed,
@@ -65,6 +64,7 @@ private:
 	bool areDisplaySyncSignalsEnabled;
 	bool isVipMemoryRefreshing;
 	bool isDisplayEnabled;
+	bool isDisplayReady;
 	DisplayProcedureStatus displayProcedureStatus;
 
 	unsigned short interruptClearReg;
