@@ -33,6 +33,7 @@ void Nvc::Run(int targetCycleCount)
 			bool branchTaken = false;
 			switch (cond)
 			{
+			case 0x01: branchTaken = pswCy; break; // BC/BL
 			case 0x02: branchTaken = pswZ; break; // BZ/BE
 
 			case 0x05: branchTaken = true; break; // BR
@@ -107,6 +108,25 @@ void Nvc::Run(int targetCycleCount)
 						cycles(1);
 					}
 					break;
+				case 0x04: // SHL (Register)
+					{
+						unsigned int r1 = r[reg1];
+						unsigned int r2 = r[reg2];
+						unsigned int res = r2;
+						pswCy = false;
+						if (r1)
+						{
+							res <<= (r1 - 1);
+							pswCy = isSigned(res);
+							res <<= 1;
+						}
+						setReg(reg2, res);
+						pswOv = false;
+						pswS = isSigned(res);
+						pswZ = !res;
+						cycles(1);
+					}
+					break;
 
 				case 0x06: pc = r[reg1] & 0xfffffffe; incrementPc = false; cycles(3); break; // JMP
 
@@ -149,6 +169,7 @@ void Nvc::Run(int targetCycleCount)
 			else if (opcode < 0x20)
 			{
 				// Format II
+				bool incrementPc = true;
 				unsigned int imm5 = reg1;
 				unsigned int seImm5 = imm5;
 				if (seImm5 & 0x10) seImm5 |= 0xffffffe0;
@@ -222,9 +243,20 @@ void Nvc::Run(int targetCycleCount)
 					}
 					break;
 
-				/*case 0x19: // RETI
-					
-					break;*/
+				case 0x19: // RETI
+					if (pswNp)
+					{
+						pc = fepc;
+						setPsw(fepsw);
+					}
+					else
+					{
+						pc = eipc;
+						setPsw(eipsw);
+					}
+					incrementPc = false;
+					cycles(10);
+					break;
 
 				case 0x1c: // LDSR
 					switch (imm5)
@@ -245,7 +277,7 @@ void Nvc::Run(int targetCycleCount)
 				default:
 					invalidOpcode();
 				}
-				pc += 2;
+				if (incrementPc) pc += 2;
 			}
 			else
 			{

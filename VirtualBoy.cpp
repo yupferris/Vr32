@@ -256,6 +256,7 @@ void VirtualBoy::ensureRamSize(unsigned int ramAddress)
 	if ((int)ramAddress > ramSize)
 	{
 		auto oldRamSize = ramSize;
+		if (!ramSize) ramSize = 1;
 		while (ramSize < (int)ramAddress) ramSize *= 2;
 		Random random(Time::GetCurrent());
 		for (int i = oldRamSize; i < ramSize; i++) ram[i] = random.GetNextInt(256);
