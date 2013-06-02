@@ -42,28 +42,22 @@ void Vip::Reset()
 	}
 	for (int i = 0; i < 0x8000; i++) chrRam[i] = random.GetNextInt(256);
 
-	interruptPendingReg = random.GetNextInt(0xffff);
-	interruptEnableReg = random.GetNextInt(0xffff);
-	interruptClearReg = random.GetNextInt(0xffff);
-	displayStatusReg = random.GetNextInt(0xffff);
-	displayControlReg = random.GetNextInt(0xffff);
-	ledBrightness1Reg = random.GetNextInt(0xffff);
-	ledBrightness2Reg = random.GetNextInt(0xffff);
-	ledBrightmess3Reg = random.GetNextInt(0xffff);
-	ledBrightnessIdleReg = random.GetNextInt(0xffff);
-	frameRepeatReg = random.GetNextInt(0xffff);
-	columnTableAddressReg = random.GetNextInt(0xffff);
-	drawingStatusReg = random.GetNextInt(0xffff);
-	drawingControlReg = random.GetNextInt(0xffff);
-	objGroup0PointerReg = random.GetNextInt(0xffff);
-	objGroup1PointerReg = random.GetNextInt(0xffff);
-	objGroup2PointerReg = random.GetNextInt(0xffff);
-	objGroup3PointerReg = random.GetNextInt(0xffff);
+	interruptClearReg = random.GetNextInt(0x10000);
+	displayControlReg = random.GetNextInt(0x10000);
+	ledBrightness1Reg = random.GetNextInt(0x10000);
+	ledBrightness2Reg = random.GetNextInt(0x10000);
+	ledBrightmess3Reg = random.GetNextInt(0x10000);
+	frameRepeatReg = random.GetNextInt(0x10000);
+	drawingControlReg = random.GetNextInt(0x10000);
+	objGroup0PointerReg = random.GetNextInt(0x10000);
+	objGroup1PointerReg = random.GetNextInt(0x10000);
+	objGroup2PointerReg = random.GetNextInt(0x10000);
+	objGroup3PointerReg = random.GetNextInt(0x10000);
 
 	for (int i = 0; i < 4; i++)
 	{
-		registerToPalette(random.GetNextInt(0xffff), bgPalettes[i]);
-		registerToPalette(random.GetNextInt(0xffff), objPalettes[i]);
+		registerToPalette(random.GetNextInt(0x10000), bgPalettes[i]);
+		registerToPalette(random.GetNextInt(0x10000), objPalettes[i]);
 	}
 	clearColorReg = random.GetNextInt(4);
 
@@ -116,6 +110,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		return readPixelByte(leftFrameBuffer0, address);
 	}
 	else if (address < 0x008000)
 	{
@@ -124,6 +119,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		return readPixelByte(leftFrameBuffer1, address - 0x008000);
 	}
 	else if (address < 0x010000)
 	{
@@ -132,6 +128,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		return readPixelByte(rightFrameBuffer0, address - 0x010000);
 	}
 	else if (address < 0x018000)
 	{
@@ -140,6 +137,7 @@ unsigned char Vip::ReadByte(unsigned int address)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		return readPixelByte(rightFrameBuffer1, address - 0x018000);
 	}
 	else if (address < 0x020000)
 	{
@@ -175,6 +173,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		return readPixelWord(leftFrameBuffer0, address);
 	}
 	else if (address < 0x008000)
 	{
@@ -183,6 +182,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		return readPixelWord(leftFrameBuffer1, address - 0x008000);
 	}
 	else if (address < 0x010000)
 	{
@@ -191,6 +191,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		return readPixelWord(rightFrameBuffer0, address - 0x010000);
 	}
 	else if (address < 0x018000)
 	{
@@ -199,6 +200,7 @@ unsigned short Vip::ReadWord(unsigned int address)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		return readPixelWord(rightFrameBuffer1, address - 0x018000);
 	}
 	else if (address < 0x020000)
 	{
@@ -226,14 +228,11 @@ unsigned short Vip::ReadWord(unsigned int address)
 		if (address < 0x05e000) address = (address & 0x001fff) | 0x05e000; // Mirroring
 		switch (address)
 		{
-		case 0x0005f800: flush(); return interruptPendingReg; // Interrupt Pending
-		case 0x0005f802: return interruptEnableReg; // Interrupt Enable
-		case 0x0005f804: return interruptClearReg; // Interrupt Clear
-		case 0x0005f820: flush(); return displayStatusReg; // Display Status
-		case 0x0005f82e: return frameRepeatReg; // Frame Repeat
-		case 0x0005f830: flush(); return columnTableAddressReg; // Column Table Address
-		case 0x0005f840: flush(); return drawingStatusReg; // Drawing Status
-		case 0x0005f842: return drawingControlReg; // Drawing Control
+		case 0x0005f800: flush(); break; // Interrupt Pending
+		case 0x0005f802: break; // Interrupt Enable
+		case 0x0005f820: flush(); break; // Display Status
+		case 0x0005f830: flush(); break; // Column Table Address
+		case 0x0005f840: flush(); break; // Drawing Status
 		case 0x0005f844: return 2; // Version
 		case 0x0005f848: return objGroup0PointerReg; // OBJ Group 0 Pointer
 		case 0x0005f84a: return objGroup1PointerReg; // OBJ Group 1 Pointer
@@ -264,6 +263,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		writePixelByte(leftFrameBuffer0, address, value);
 	}
 	else if (address < 0x008000)
 	{
@@ -272,6 +272,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		writePixelByte(leftFrameBuffer1, address - 0x008000, value);
 	}
 	else if (address < 0x010000)
 	{
@@ -280,6 +281,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		writePixelByte(rightFrameBuffer0, address - 0x010000, value);
 	}
 	else if (address < 0x018000)
 	{
@@ -288,6 +290,7 @@ void Vip::WriteByte(unsigned int address, unsigned char value)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		writePixelByte(rightFrameBuffer1, address - 0x018000, value);
 	}
 	else if (address < 0x020000)
 	{
@@ -322,6 +325,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	if (address < 0x006000)
 	{
 		// Left Frame Buffer 0
+		writePixelWord(leftFrameBuffer0, address, value);
 	}
 	else if (address < 0x008000)
 	{
@@ -330,6 +334,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	else if (address < 0x00e000)
 	{
 		// Left Frame Buffer 1
+		writePixelWord(leftFrameBuffer1, address - 0x008000, value);
 	}
 	else if (address < 0x010000)
 	{
@@ -338,6 +343,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	else if (address < 0x016000)
 	{
 		// Right Frame Buffer 0
+		writePixelWord(rightFrameBuffer0, address - 0x010000, value);
 	}
 	else if (address < 0x018000)
 	{
@@ -346,6 +352,7 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 	else if (address < 0x01e000)
 	{
 		// Right Frame Buffer 1
+		writePixelWord(rightFrameBuffer1, address - 0x018000, value);
 	}
 	else if (address < 0x020000)
 	{
@@ -373,17 +380,13 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 		if (address < 0x05e000) address = (address & 0x001fff) | 0x05e000; // Mirroring
 		switch (address)
 		{
-		case 0x0005f800: break; // Interrupt Pending
 		case 0x0005f802: break; // Interrupt Enable
 		case 0x0005f804: break; // Interrupt Clear
 		case 0x0005f822: break; // Display Control
 		case 0x0005f824: break; // LED Brightness 1
 		case 0x0005f826: break; // LED Brightness 2
 		case 0x0005f828: break; // LED Brightness 3
-		case 0x0005f82a: break; // LED Brightness Idle
-		case 0x0005f82e: break; // Frame Repeat
-		case 0x0005f830: break; // Column Table Address
-		case 0x0005f840: break; // Drawing Status
+		case 0x0005f82e: flush(); frameRepeatReg = value; // Frame Repeat
 		case 0x0005f842: break; // Drawing Control
 		case 0x0005f848: break; // OBJ Group 0 Pointer
 		case 0x0005f84a: break; // OBJ Group 1 Pointer
@@ -422,6 +425,27 @@ void Vip::flush()
 
 
 	cyclesSinceLastFlush = 0;
+}
+
+unsigned char Vip::readPixelByte(const unsigned char *frameBuffer, unsigned int address)
+{
+	throw FSL_EXCEPTION("Pixel read");
+}
+
+unsigned short Vip::readPixelWord(const unsigned char *frameBuffer, unsigned int address)
+{
+	return (readPixelByte(frameBuffer, address + 1) << 16) | readPixelByte(frameBuffer, address);
+}
+
+void Vip::writePixelByte(unsigned char *frameBuffer, unsigned int address, unsigned char value)
+{
+	throw FSL_EXCEPTION("Pixel write");
+}
+
+void Vip::writePixelWord(unsigned char *frameBuffer, unsigned int address, unsigned short value)
+{
+	writePixelByte(frameBuffer, address, value & 0xff);
+	writePixelByte(frameBuffer, address + 1, (value >> 8) & 0xff);
 }
 
 unsigned short Vip::paletteToRegister(unsigned int *palette)

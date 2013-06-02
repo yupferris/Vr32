@@ -32,6 +32,11 @@ private:
 
 	void flush();
 
+	unsigned char readPixelByte(const unsigned char *frameBuffer, unsigned int address);
+	unsigned short readPixelWord(const unsigned char *frameBuffer, unsigned int address);
+	void writePixelByte(unsigned char *frameBuffer, unsigned int address, unsigned char value);
+	void writePixelWord(unsigned char *frameBuffer, unsigned int address, unsigned short value);
+
 	unsigned short paletteToRegister(unsigned int *palette);
 	void registerToPalette(unsigned short reg, unsigned int *palette);
 
@@ -43,15 +48,10 @@ private:
 
 	IVideoDriver *videoDriver;
 
-	unsigned short interruptPendingReg;
-	unsigned short interruptEnableReg;
 	unsigned short interruptClearReg;
-	unsigned short displayStatusReg;
 	unsigned short displayControlReg;
-	unsigned short ledBrightness1Reg, ledBrightness2Reg, ledBrightmess3Reg, ledBrightnessIdleReg;
+	unsigned short ledBrightness1Reg, ledBrightness2Reg, ledBrightmess3Reg;
 	unsigned short frameRepeatReg;
-	unsigned short columnTableAddressReg;
-	unsigned short drawingStatusReg;
 	unsigned short drawingControlReg;
 	unsigned short objGroup0PointerReg, objGroup1PointerReg, objGroup2PointerReg, objGroup3PointerReg;
 
