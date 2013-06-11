@@ -37,10 +37,18 @@ private:
 		RightFb1BeingDisplayed,
 	};
 
+	enum class DrawingProcedureStatus
+	{
+		None,
+		WritingToFrameBuffer,
+		Finished,
+	};
+
 	static const int frameWidth, frameHeight;
 	static const int frameBufferSize;
 
 	void flush();
+	void run(int targetCycleCount);
 
 	void startVipRefresh();
 
@@ -79,7 +87,9 @@ private:
 
 	unsigned char *currentLeftFrameBuffer, *currentRightFrameBuffer;
 
-	int cyclesSinceLastFlush;
+	int cyclesSinceFrameStart, cyclesSinceLastFlush;
+	bool skipDrawingProcedure;
+	DrawingProcedureStatus drawingProcedureStatus;
 };
 
 #endif

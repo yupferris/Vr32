@@ -45,7 +45,8 @@ void Vip::Reset()
 	isColumnTableAddressLocked = false;
 	areDisplaySyncSignalsEnabled = false;
 	isVipMemoryRefreshing = false;
-	isDisplayEnabled = isDisplayReady = false;
+	isDisplayEnabled = false;
+	isDisplayReady = true;
 	displayProcedureStatus = DisplayProcedureStatus::None;
 
 	interruptClearReg = random.GetNextInt(0x10000);
@@ -71,11 +72,15 @@ void Vip::Reset()
 	currentRightFrameBuffer = rightFrameBuffer0;
 
 	cyclesSinceLastFlush = 0;
+	drawingProcedureStatus = DrawingProcedureStatus::None;
 }
 
 void Vip::StartFrame()
 {
 	displayProcedureStatus = DisplayProcedureStatus::StartOfFrameProcessing;
+
+	cyclesSinceFrameStart = 0;
+	skipDrawingProcedure = false;
 }
 
 void Vip::EndFrame()
@@ -108,6 +113,7 @@ void Vip::SetVideoDriver(IVideoDriver *videoDriver)
 
 void Vip::CpuCyclesCallback(int numCycles)
 {
+	cyclesSinceFrameStart += numCycles;
 	cyclesSinceLastFlush += numCycles;
 }
 
@@ -251,7 +257,15 @@ unsigned short Vip::ReadWord(unsigned int address)
 				((displayProcedureStatus == DisplayProcedureStatus::LeftFb0BeingDisplayed ? 1 : 0) << 2) |
 				((isDisplayEnabled ? 1 : 0) << 1);
 		case 0x0005f830: flush(); break; // Column Table Address
-		case 0x0005f840: flush(); break; // Drawing Status
+		case 0x0005f840: // Drawing Status
+			flush();
+			return
+				((false ? 1 : 0) << 15) | // Drawing at Y position (TODO)
+				((0 / 8) << 8) | // Current Y position (TODO)
+				((false ? 1 : 0) << 4) | // Drawing exceeds frame period (TODO)
+				(((drawingProcedureStatus == DrawingProcedureStatus::WritingToFrameBuffer && currentLeftFrameBuffer == leftFrameBuffer0) ? 1 : 0) << 3) |
+				(((drawingProcedureStatus == DrawingProcedureStatus::WritingToFrameBuffer && currentLeftFrameBuffer == leftFrameBuffer1) ? 1 : 0) << 3) |
+				((true ? 1 : 0) << 1); // Drawing is enabled (TODO)
 		case 0x0005f844: return 2; // Version
 		case 0x0005f848: return objGroup0PointerReg; // OBJ Group 0 Pointer
 		case 0x0005f84a: return objGroup1PointerReg; // OBJ Group 1 Pointer
@@ -406,12 +420,12 @@ void Vip::WriteWord(unsigned int address, unsigned short value)
 			isColumnTableAddressLocked = ((value >> 10) & 1) == 1;
 			areDisplaySyncSignalsEnabled = ((value >> 9) & 1) == 1;
 			if ((value >> 8) & 1) startVipRefresh();
-			isDisplayEnabled = isDisplayReady = ((value >> 1) & 1) == 1;
+			isDisplayEnabled = ((value >> 1) & 1) == 1;
 			break;
 		case 0x0005f824: break; // LED Brightness 1
 		case 0x0005f826: break; // LED Brightness 2
 		case 0x0005f828: break; // LED Brightness 3
-		case 0x0005f82e: flush(); frameRepeatReg = value; // Frame Repeat
+		case 0x0005f82e: flush(); frameRepeatReg = value & 0x000f; // Frame Repeat
 		case 0x0005f842: break; // Drawing Control
 		case 0x0005f848: break; // OBJ Group 0 Pointer
 		case 0x0005f84a: break; // OBJ Group 1 Pointer
@@ -447,14 +461,40 @@ int Vip::GetOutputHeight() const
 
 void Vip::flush()
 {
+	if (isVipMemoryRefreshing) isVipMemoryRefreshing = false;
 
+	switch (displayProcedureStatus)
+	{
+	case DisplayProcedureStatus::StartOfFrameProcessing:
+		if (frameRepeatReg)
+		{
+			frameRepeatReg--;
+			skipDrawingProcedure = true;
+		}
+
+		if (!skipDrawingProcedure)
+		{
+			if (drawingProcedureStatus == DrawingProcedureStatus::None) drawingProcedureStatus = DrawingProcedureStatus::WritingToFrameBuffer;
+
+			
+		}
+
+		break;
+	}
+
+	run(cyclesSinceLastFlush);
 
 	cyclesSinceLastFlush = 0;
 }
 
+void Vip::run(int targetCycleCount)
+{
+
+}
+
 void Vip::startVipRefresh()
 {
-	// TODO: I have no fucking clue what else this entails.
+	// TODO: I have no fucking clue how long this should take.
 	isVipMemoryRefreshing = true;
 }
 

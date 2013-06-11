@@ -35,13 +35,16 @@ void Nvc::Run(int targetCycleCount)
 			{
 			case 0x01: branchTaken = pswCy; break; // BC/BL
 			case 0x02: branchTaken = pswZ; break; // BZ/BE
-
+			case 0x03: branchTaken = pswCy || pswZ; break; // BNH
+			case 0x04: branchTaken = pswS; break; // BN
 			case 0x05: branchTaken = true; break; // BR
 			case 0x06: branchTaken = pswS != pswOv; break; // BLT
 			case 0x07: branchTaken = pswS != pswOv || pswZ; break; // BLE
-
+			case 0x08: branchTaken = !pswOv; break; // BNV
+			case 0x09: branchTaken = !pswCy; break; // BNC/BNL
 			case 0x0a: branchTaken = !pswZ; break; // BNZ/BNE
-
+			case 0x0b: branchTaken = !(pswCy || pswZ); break; // BH
+			case 0x0c: branchTaken = !pswS; break; // BP
 			case 0x0e: branchTaken = pswS == pswOv; break; // BGE
 			case 0x0f: branchTaken = !(pswS != pswOv || pswZ); break; // BGT
 			default:
