@@ -3,7 +3,7 @@
 
 #include "Common.h"
 
-class Nvc : public Cpu32
+class Nvc
 {
 public:
 	Nvc(IEmulator32 *emulator);
@@ -22,6 +22,8 @@ private:
 	void cycles(int numCycles);
 
 	void invalidOpcode();
+
+	IEmulator32 *emulator;
 
 	unsigned int r[32];
 	unsigned int pc;

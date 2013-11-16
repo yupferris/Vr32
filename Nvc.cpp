@@ -1,8 +1,8 @@
 #include "Nvc.h"
 
 Nvc::Nvc(IEmulator32 *emulator)
-	: Cpu32(emulator)
 {
+	this->emulator = emulator;
 }
 
 void Nvc::Reset()
@@ -386,7 +386,7 @@ bool Nvc::isSigned(unsigned int value)
 void Nvc::cycles(int numCycles)
 {
 	emulator->CpuCyclesCallback(numCycles);
-	cycleCount++;
+	cycleCount += numCycles;
 }
 
 void Nvc::invalidOpcode()

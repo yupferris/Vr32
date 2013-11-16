@@ -12,10 +12,10 @@ public:
 	~VirtualBoy();
 
 	virtual void Reset();
-	virtual void Update();
+	void Update();
 
-	virtual void SetVideoDriver(IVideoDriver *videoDriver);
-	virtual void SetAudioDriver(IAudioDriver *audioDriver);
+	void SetVideoDriver(IVideoDriver *videoDriver);
+	void SetAudioDriver(IAudioDriver *audioDriver);
 
 	virtual void CpuCyclesCallback(int numCycles);
 
@@ -31,8 +31,8 @@ public:
 	void LoadRom(const List<unsigned char>& rom);
 	void LoadRam(const List<unsigned char>& ram);
 
-	virtual int GetOutputWidth() const;
-	virtual int GetOutputHeight() const;
+	int GetOutputWidth() const;
+	int GetOutputHeight() const;
 
 	unsigned char *GetRam() const;
 	int GetRamSize() const;
